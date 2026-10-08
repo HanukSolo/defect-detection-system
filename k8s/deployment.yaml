@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: defect-detection-deployment
+  labels:
+    app: defect-detection
+spec:
+  replicas: 2  # Запускаем 2 копии для отказоустойчивости
+  selector:
+    matchLabels:
+      app: defect-detection
+  template:
+    metadata:
+      labels:
+        app: defect-detection
+    spec:
+      containers:
+      - name: defect-detection-api
+        image: defect-detection-api:latest
+        imagePullPolicy: Never  # Используем локальный образ
+
+        ports:
+        - containerPort: 8000
+
+        # Проверка жизнеспособности
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 10  # Ждем 10 сек перед первой проверкой
+          periodSeconds: 15        # Проверяем каждые 15 сек
+
+        # Проверка готовности
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 10
+
+        # Ограничения ресурсов
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"  # 250 мили-CPU (0.25 ядра)
+          limits:
+            memory: "1Gi"
+            cpu: "500m"  # 500 мили-CPU (0.5 ядра)

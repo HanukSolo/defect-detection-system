@@ -1,0 +1,18 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: defect-detection-monitor
+  namespace: monitoring
+  labels:
+    release: my-monitoring
+spec:
+  selector:
+    matchLabels:
+      app: defect-detection
+  namespaceSelector:
+    matchNames:
+    - default  
+  endpoints:
+  - port: http
+    interval: 15s
+    path: /metrics
